@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Country;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class CountryController extends Controller
 {
@@ -23,6 +24,7 @@ class CountryController extends Controller
     public function create()
     {
         //
+        return view('admin.countries.create');
     }
 
     /**
@@ -31,6 +33,18 @@ class CountryController extends Controller
     public function store(Request $request)
     {
         //
+        {
+            $request->validate([
+                'name' => 'required|string|max:255|unique:countries,name',
+            ]);
+
+            Country::create([
+                'name' => $request->input('name'),
+                'slug' => Str::slug($request->input('name')),
+            ]);
+
+            return redirect()->route('admin.countries.index')->with('success', 'Country created successfully.');
+        }
     }
 
     /**
@@ -39,6 +53,8 @@ class CountryController extends Controller
     public function show(Country $country)
     {
         //
+        return view('admin.countries.show', compact('country'));
+
     }
 
     /**
@@ -46,7 +62,8 @@ class CountryController extends Controller
      */
     public function edit(Country $country)
     {
-        //
+        //   
+        return view('admin.countries.edit', compact('country'));
     }
 
     /**
@@ -54,7 +71,16 @@ class CountryController extends Controller
      */
     public function update(Request $request, Country $country)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255|unique:countries,name,' . $country->id,
+        ]);
+
+        $country->update([
+            'name' => $request->input('name'),
+            'slug' => Str::slug($request->input('name')),
+        ]);
+
+        return redirect()->route('admin.countries.index')->with('success', 'Country updated successfully.');
     }
 
     /**
@@ -62,6 +88,8 @@ class CountryController extends Controller
      */
     public function destroy(Country $country)
     {
-        //
+        $country->delete();
+
+        return redirect()->route('admin.countries.index')->with('success', 'Country deleted successfully.');
     }
 }

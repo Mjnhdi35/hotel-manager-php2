@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\City;
+use App\Models\Country;
 use App\Models\Hotel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class HotelController extends Controller
 {
@@ -23,6 +26,9 @@ class HotelController extends Controller
     public function create()
     {
         //
+        $cities = City::all();
+        $countries = Country::all();
+        return view('admin.hotels.create', compact('cities', 'countries'));
     }
 
     /**
@@ -31,6 +37,17 @@ class HotelController extends Controller
     public function store(Request $request)
     {
         //
+        {
+            $data = $request->validated();
+            if ($request->hasFile('thumbnail')) {
+                $data['thumbnail'] = $request->file('thumbnail')->store('images', 'public');
+            }
+            $data['slug'] = Str::slug($data['name']);
+            $hotel = Hotel::create($data);
+
+            return redirect()->route('admin.hotels.index')->with('success', 'Hotel created successfully!');
+        }
+
     }
 
     /**
@@ -39,6 +56,8 @@ class HotelController extends Controller
     public function show(Hotel $hotel)
     {
         //
+        $hotel->load(['city', 'country', 'photos', 'rooms']);
+        return view('admin.hotels.show', compact('hotel'));
     }
 
     /**
@@ -47,6 +66,9 @@ class HotelController extends Controller
     public function edit(Hotel $hotel)
     {
         //
+        $cities = City::all();
+        $countries = Country::all();
+        return view('admin.hotels.edit', compact('hotel', 'cities', 'countries'));
     }
 
     /**
@@ -54,14 +76,23 @@ class HotelController extends Controller
      */
     public function update(Request $request, Hotel $hotel)
     {
-        //
+        $data = $request->validated();
+        if ($request->hasFile('thumbnail')) {
+            $data['thumbnail'] = $request->file('thumbnail')->store('images', 'public');
+        }
+        $data['slug'] = Str::slug($data['name']);
+        $hotel->update($data);
+
+        return redirect()->route('admin.hotels.index')->with('success', 'Hotel updated successfully!');
     }
+
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Hotel $hotel)
     {
-        //
+        $hotel->delete();
+        return redirect()->route('admin.hotels.index')->with('success', 'Hotel deleted successfully!');
     }
 }
