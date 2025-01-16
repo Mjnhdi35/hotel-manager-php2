@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\City;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class CityController extends Controller
 {
@@ -24,7 +23,6 @@ class CityController extends Controller
     public function create()
     {
         //
-        return view('admin.cities.create');
     }
 
     /**
@@ -32,16 +30,7 @@ class CityController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255|unique:cities,name',
-        ]);
-
-        City::create([
-            'name' => $request->input('name'),
-            'slug' => Str::slug($request->input('name')),
-        ]);
-
-        return redirect()->route('admin.cities.index')->with('success', 'City created successfully.');
+        //
     }
 
     /**
@@ -50,7 +39,6 @@ class CityController extends Controller
     public function show(City $city)
     {
         //
-        return view('admin.cities.show', compact('city'));
     }
 
     /**
@@ -59,7 +47,6 @@ class CityController extends Controller
     public function edit(City $city)
     {
         //
-        return view('admin.cities.edit', compact('city'));
     }
 
     /**
@@ -67,18 +54,7 @@ class CityController extends Controller
      */
     public function update(Request $request, City $city)
     {
-
-        $request->validate([
-            'name' => 'required|string|max:255|unique:cities,name,' . $city->id,
-        ]);
-
-
-        $city->update([
-            'name' => $request->input('name'),
-        ]);
-
-
-        return redirect()->route('admin.cities.index')->with('success', 'City updated successfully.');
+        //
     }
 
     /**
@@ -86,10 +62,6 @@ class CityController extends Controller
      */
     public function destroy(City $city)
     {
-
-        $city->delete();
-
-
-        return redirect()->route('admin.cities.index')->with('success', 'City deleted successfully.');
+        //
     }
 }

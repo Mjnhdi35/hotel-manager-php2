@@ -2,11 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\City;
-use App\Models\Country;
 use App\Models\Hotel;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class HotelController extends Controller
 {
@@ -26,9 +23,7 @@ class HotelController extends Controller
     public function create()
     {
         //
-        $cities = City::all();
-        $countries = Country::all();
-        return view('admin.hotels.create', compact('cities', 'countries'));
+        return view('admin.hotels.create');
     }
 
     /**
@@ -36,18 +31,26 @@ class HotelController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        {
-            $data = $request->validated();
-            if ($request->hasFile('thumbnail')) {
-                $data['thumbnail'] = $request->file('thumbnail')->store('images', 'public');
-            }
-            $data['slug'] = Str::slug($data['name']);
-            $hotel = Hotel::create($data);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:hotels,slug',
+            'thumbnail' => 'required|image',
+            'link_ggmaps' => 'nullable|url',
+            'city_id' => 'required|exists:cities,id',
+            'country_id' => 'required|exists:countries,id',
+            'address' => 'required|string|max:255',
+            'start_level' => 'nullable|integer',
+        ]);
 
-            return redirect()->route('admin.hotels.index')->with('success', 'Hotel created successfully!');
+        $hotel = Hotel::create($request->all());
+
+        // Handle thumbnail upload
+        if ($request->hasFile('thumbnail')) {
+            $hotel->thumbnail = $request->file('thumbnail')->store('thumbnails');
+            $hotel->save();
         }
 
+        return redirect()->route('admin.hotels.index')->with('success', 'Hotel created successfully!');
     }
 
     /**
@@ -56,7 +59,6 @@ class HotelController extends Controller
     public function show(Hotel $hotel)
     {
         //
-        $hotel->load(['city', 'country', 'photos', 'rooms']);
         return view('admin.hotels.show', compact('hotel'));
     }
 
@@ -66,9 +68,7 @@ class HotelController extends Controller
     public function edit(Hotel $hotel)
     {
         //
-        $cities = City::all();
-        $countries = Country::all();
-        return view('admin.hotels.edit', compact('hotel', 'cities', 'countries'));
+        return view('admin.hotels.edit', compact('hotel'));
     }
 
     /**
@@ -76,22 +76,34 @@ class HotelController extends Controller
      */
     public function update(Request $request, Hotel $hotel)
     {
-        $data = $request->validated();
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:hotels,slug,' . $hotel->id,
+            'thumbnail' => 'nullable|image',
+            'link_ggmaps' => 'nullable|url',
+            'city_id' => 'required|exists:cities,id',
+            'country_id' => 'required|exists:countries,id',
+            'address' => 'required|string|max:255',
+            'start_level' => 'nullable|integer',
+        ]);
+
+        $hotel->update($request->all());
+
+        // Handle thumbnail upload
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail'] = $request->file('thumbnail')->store('images', 'public');
+            $hotel->thumbnail = $request->file('thumbnail')->store('thumbnails');
+            $hotel->save();
         }
-        $data['slug'] = Str::slug($data['name']);
-        $hotel->update($data);
 
-        return redirect()->route('admin.hotels.index')->with('success', 'Hotel updated successfully!');
+        return redirect()->route('admin.hotels.show', $hotel)->with('success', 'Hotel updated successfully!');
     }
-
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Hotel $hotel)
     {
+        //
         $hotel->delete();
         return redirect()->route('admin.hotels.index')->with('success', 'Hotel deleted successfully!');
     }

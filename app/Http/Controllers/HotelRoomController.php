@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreRoomRequest;
-use App\Models\Hotel;
 use App\Models\HotelRoom;
 use Illuminate\Http\Request;
 
@@ -14,78 +12,70 @@ class HotelRoomController extends Controller
      */
     public function index()
     {
-        $rooms = HotelRoom::with('hotel')->orderByDesc('id')->paginate(10);
-        return view('admin.rooms.index', compact('rooms'));
+        //
+
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Hotel $hotel)
+    public function create()
     {
-        return view('admin.rooms.create', compact('hotel'));
+        //
     }
-
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreRoomRequest $request, Hotel $hotel)
+    public function store(Request $request)
     {
-        $data = $request->validated();
-        $data['photo'] = $request->file('photo')->store('rooms', 'public');
-        $data['hotel_id'] = $hotel->id;
-
-        HotelRoom::create($data);
-
-        return redirect()->route('hotel_rooms.create', $hotel->slug)
-            ->with('success', 'Room added successfully!');
+        //
     }
-
 
     /**
      * Display the specified resource.
      */
-    public function show(Hotel $hotel, HotelRoom $hotelRoom)
+    public function show(HotelRoom $hotelRoom)
     {
-        return view('admin.rooms.show', compact('hotel', 'hotelRoom'));
+        //
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Hotel $hotel, HotelRoom $hotelRoom)
+    public function edit(HotelRoom $hotelRoom)
     {
-        return view('admin.rooms.edit', compact('hotel', 'hotelRoom'));
+        //
     }
-
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreRoomRequest $request, HotelRoom $hotelRoom)
+    public function update(Request $request, HotelRoom $hotelRoom)
     {
-        $data = $request->validated();
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'photo' => 'nullable|image',
+            'price' => 'required|numeric',
+            'total_people' => 'required|integer',
+        ]);
+
+        $hotelRoom->update($request->all());
 
         if ($request->hasFile('photo')) {
-            $data['photo'] = $request->file('photo')->store('rooms', 'public');
+            $hotelRoom->photo = $request->file('photo')->store('room_photos', 'public');
+            $hotelRoom->save();
         }
 
-        $hotelRoom->update($data);
-
-        return redirect()->route('hotel_rooms.edit', [$hotelRoom->hotel->slug, $hotelRoom])
-            ->with('success', 'Room updated successfully!');
+        return redirect()->route('admin.hotel_rooms.index', $hotelRoom->hotel)->with('success', 'Room updated successfully!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Hotel $hotel, HotelRoom $hotelRoom)
+    public function destroy(HotelRoom $hotelRoom)
     {
         $hotelRoom->delete();
-
-        return redirect()->route('hotel_rooms.create', $hotel->slug)
-            ->with('success', 'Room deleted successfully!');
+        return redirect()->route('admin.hotel_rooms.index', $hotelRoom->hotel)->with('success', 'Room deleted successfully!');
     }
-
 }

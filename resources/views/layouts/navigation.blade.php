@@ -31,8 +31,6 @@
                     <x-nav-link :href="route('admin.hotel_bookings.index')" :active="request()->routeIs('admin.hotel_bookings.index')">
                         {{ __('Hotel Bookings') }}
                     </x-nav-link>
-
-                   
                 </div>
             </div>
 

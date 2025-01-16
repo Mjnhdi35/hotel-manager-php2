@@ -1,35 +1,40 @@
 <x-app-layout>
-    <div class="max-w-4xl mx-auto mt-6 bg-white shadow-md rounded-lg p-6">
-        <h2 class="text-3xl font-bold mb-6">Hotel Details</h2>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Hotel: ') }} {{ $hotel->name }}
+        </h2>
+    </x-slot>
 
-        <div class="mb-4">
-            <label class="block font-semibold text-gray-700">Name:</label>
-            <p class="text-lg">{{ $hotel->name }}</p>
-        </div>
-        <div class="mb-4">
-            <label class="block font-semibold text-gray-700">Address:</label>
-            <p class="text-lg">{{ $hotel->address }}</p>
-        </div>
-        <div class="mb-4">
-            <label class="block font-semibold text-gray-700">City:</label>
-            <p class="text-lg">{{ $hotel->city->name }}</p>
-        </div>
-        <div class="mb-4">
-            <label class="block font-semibold text-gray-700">Country:</label>
-            <p class="text-lg">{{ $hotel->country->name }}</p>
-        </div>
-        <div class="mb-4">
-            <label class="block font-semibold text-gray-700">Starting Level:</label>
-            <p class="text-lg">{{ $hotel->start_level }}</p>
-        </div>
-        <div class="mb-4">
-            <label class="block font-semibold text-gray-700">Thumbnail:</label>
-            <img src="{{ Storage::url($hotel->thumbnail) }}" class="w-full h-64 object-cover mt-2">
-        </div>
-
-        <div class="flex justify-end mt-6">
-            <a href="{{ route('admin.hotels.edit', $hotel) }}"
-                class="bg-orange-600 text-white px-6 py-2 rounded-lg">Edit</a>
-        </div>
+    <div class="my-6">
+        <h3 class="text-lg font-semibold">Rooms</h3>
+        <a href="{{ route('admin.hotel_rooms.create', $hotel) }}" class="bg-green-500 text-white py-2 px-4 rounded">Add
+            Room</a>
     </div>
+
+    @forelse ($hotel->rooms as $room)
+        <div class="p-4 bg-white border mb-4">
+            <h4 class="font-semibold">{{ $room->name }}</h4>
+            <div class="flex items-center">
+                @if ($room->photo)
+                    <img src="{{ Storage::url($room->photo) }}" alt="Room Photo" class="w-32 h-32 object-cover mr-4">
+                @endif
+                <div>
+                    <p class="text-sm">Price: VNĐ {{ number_format($room->price, 0, ',', '.') }} / Night</p>
+                    <p class="text-sm">Capacity: {{ $room->total_people }} persons</p>
+                </div>
+            </div>
+            <div class="mt-4 flex justify-between">
+                <a href="{{ route('admin.hotel_rooms.edit', [$hotel, $room]) }}" class="text-blue-500">Edit</a>
+
+                <form action="{{ route('admin.hotel_rooms.destroy', [$hotel, $room]) }}" method="POST" class="inline-block">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="text-red-500">Delete</button>
+                </form>
+            </div>
+        </div>
+    @empty
+        <p>No rooms available for this hotel.</p>
+    @endforelse
+
 </x-app-layout>
