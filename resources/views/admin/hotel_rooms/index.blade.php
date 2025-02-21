@@ -1,36 +1,33 @@
 <x-app-layout>
-    <div class="bg-slate-200 shadow-sm flex justify-between items-center max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <h2 class="font-semibold text-3xl">Manage Rooms - {{ $hotel->name }}</h2>
-        <a href="{{ route('admin.hotel_rooms.create', $hotel) }}"
-            class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700">Add New Room</a>
-    </div>
+    <div class="max-w-4xl mx-auto bg-white shadow-md rounded-lg mt-8 p-6">
+        <h2 class="text-2xl font-semibold mb-6">Add New Room for {{ $hotel->name }}</h2>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        @foreach ($rooms as $room)
-            <div class="bg-white shadow-md rounded-lg mb-6 p-6 flex justify-between items-center">
-                <div class="flex-shrink-0">
-                    <img src="{{ Storage::url($room->photo) }}" alt="{{ $room->name }}"
-                        class="w-32 h-32 object-cover rounded-md">
-                </div>
+        <form action="{{ route('admin.hotel_rooms.store', $hotel) }}" method="POST">
+            @csrf
 
-                <div class="ml-6">
-                    <h3 class="text-xl font-semibold">{{ $room->name }}</h3>
-                    <p class="text-gray-500">{{ number_format($room->price, 0, ',', '.') }} VNĐ/Đêm</p>
-                    <p class="text-gray-500">Max people: {{ $room->total_people }}</p>
-                </div>
-
-                <div class="ml-6 flex items-center">
-                    <a href="{{ route('admin.hotel_rooms.show', $room) }}"
-                        class="text-blue-500 hover:text-blue-700 font-semibold">View</a>
-                    <a href="{{ route('admin.hotel_rooms.edit', $room) }}"
-                        class="ml-4 text-blue-500 hover:text-blue-700 font-semibold">Edit</a>
-                    <form action="{{ route('admin.hotel_rooms.destroy', $room) }}" method="POST" class="ml-4">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="text-red-500 hover:text-red-700 font-semibold">Delete</button>
-                    </form>
-                </div>
+            <div class="mb-4">
+                <label for="name" class="block text-gray-700">Room Name</label>
+                <input type="text" id="name" name="name" class="w-full border-gray-300 rounded-md shadow-sm"
+                    value="{{ old('name') }}" required>
             </div>
-        @endforeach
+
+            <div class="mb-4">
+                <label for="price" class="block text-gray-700">Price per Night (VNĐ)</label>
+                <input type="number" id="price" name="price" class="w-full border-gray-300 rounded-md shadow-sm"
+                    value="{{ old('price') }}" required>
+            </div>
+
+            <div class="mb-4">
+                <label for="total_people" class="block text-gray-700">Maximum People</label>
+                <input type="number" id="total_people" name="total_people"
+                    class="w-full border-gray-300 rounded-md shadow-sm" value="{{ old('total_people') }}" min="1"
+                    required>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700">Add
+                    Room</button>
+            </div>
+        </form>
     </div>
 </x-app-layout>

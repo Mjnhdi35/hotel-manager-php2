@@ -1,37 +1,42 @@
 <x-app-layout>
-    <div class="bg-slate-200 shadow-sm flex justify-between items-center max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <h2 class="font-semibold text-3xl">Edit Room - {{ $hotelRoom->name }}</h2>
-    </div>
+    <div class="max-w-4xl mx-auto bg-white shadow-md rounded-lg mt-8 p-6">
+        <h2 class="text-2xl font-semibold mb-6">Edit Room for {{ $hotel->name }}</h2>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <form action="{{ route('admin.hotel_rooms.update', $hotelRoom) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.hotel_rooms.update', ['hotel' => $hotel, 'hotel_room' => $hotelRoom]) }}"
+            method="POST">
             @csrf
             @method('PUT')
 
-            <div class="mb-6">
+            <!-- Room Name -->
+            <div class="mb-4">
                 <label for="name" class="block text-sm font-medium text-gray-700">Room Name</label>
                 <input type="text" name="name" id="name" value="{{ old('name', $hotelRoom->name) }}"
-                    class="mt-1 block w-full" required>
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    required>
             </div>
 
-            <div class="mb-6">
-                <label for="photo" class="block text-sm font-medium text-gray-700">Room Photo</label>
-                <input type="file" name="photo" id="photo" class="mt-1 block w-full">
-            </div>
-
-            <div class="mb-6">
-                <label for="price" class="block text-sm font-medium text-gray-700">Price (VNĐ)</label>
+            <!-- Price -->
+            <div class="mb-4">
+                <label for="price" class="block text-sm font-medium text-gray-700">Price (VNĐ/Night)</label>
                 <input type="number" name="price" id="price" value="{{ old('price', $hotelRoom->price) }}"
-                    class="mt-1 block w-full" required>
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    required>
             </div>
 
-            <div class="mb-6">
+            <!-- Total People -->
+            <div class="mb-4">
                 <label for="total_people" class="block text-sm font-medium text-gray-700">Max People</label>
                 <input type="number" name="total_people" id="total_people"
-                    value="{{ old('total_people', $hotelRoom->total_people) }}" class="mt-1 block w-full" required>
+                    value="{{ old('total_people', $hotelRoom->total_people) }}"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    required>
             </div>
 
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700">Save</button>
+            <!-- Submit Button -->
+            <div class="flex justify-end">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700">Update
+                    Room</button>
+            </div>
         </form>
     </div>
 </x-app-layout>

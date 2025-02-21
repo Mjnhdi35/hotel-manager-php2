@@ -3,107 +3,103 @@
 namespace App\Http\Controllers;
 
 use App\Models\Hotel;
+use App\Models\City;
+use App\Models\Country;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class HotelController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
-        $hotels = Hotel::orderByDesc('id')->paginate(10);
-        return view('admin.hotels.index', compact('hotels'));
+        // Lấy danh sách các khách sạn cùng với thông tin thành phố, quốc gia và phòng
+        $hotels = Hotel::with(['city', 'country', 'rooms'])->paginate(10);
+        return view('admin.hotels.index', compact('hotels')); // Trả về view với danh sách khách sạn
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
-        return view('admin.hotels.create');
+        // Lấy danh sách thành phố và quốc gia để chọn khi tạo khách sạn
+        $cities = City::all();
+        $countries = Country::all();
+        return view('admin.hotels.create', compact('cities', 'countries')); // Trả về view tạo khách sạn
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $request->validate([
+        // Validation dữ liệu đầu vào
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:hotels,slug',
-            'thumbnail' => 'required|image',
-            'link_ggmaps' => 'nullable|url',
             'city_id' => 'required|exists:cities,id',
             'country_id' => 'required|exists:countries,id',
-            'address' => 'required|string|max:255',
-            'start_level' => 'nullable|integer',
+            'address' => 'required|string|max:255', // Thêm validation cho address
+            'link_ggmaps' => 'nullable|url', // Thêm validation cho link Google Maps
+            'thumbnail' => 'nullable|image',
+            'start_level' => 'required|integer|min:1|max:5',
         ]);
 
-        $hotel = Hotel::create($request->all());
-
-        // Handle thumbnail upload
+        // Xử lý upload thumbnail nếu có
         if ($request->hasFile('thumbnail')) {
-            $hotel->thumbnail = $request->file('thumbnail')->store('thumbnails');
-            $hotel->save();
+            $validated['thumbnail'] = $request->file('thumbnail')->store('hotels', 'public');
         }
 
-        return redirect()->route('admin.hotels.index')->with('success', 'Hotel created successfully!');
+        // Tạo slug từ tên khách sạn
+        $validated['slug'] = Str::slug($validated['name']);
+
+
+        // Tạo khách sạn mới trong cơ sở dữ liệu
+        Hotel::create($validated);
+
+        // Quay lại danh sách khách sạn với thông báo thành công
+        return redirect()->route('admin.hotels.index')->with('success', 'Hotel added successfully!');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Hotel $hotel)
     {
-        //
-        return view('admin.hotels.show', compact('hotel'));
+        // Tải danh sách phòng cho khách sạn
+        $hotel->load('rooms');
+        return view('admin.hotels.show', compact('hotel')); // Trả về view quản lý phòng khách sạn
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Hotel $hotel)
     {
-        //
-        return view('admin.hotels.edit', compact('hotel'));
+        // Lấy danh sách thành phố và quốc gia để chỉnh sửa
+        $cities = City::all();
+        $countries = Country::all();
+        return view('admin.hotels.edit', compact('hotel', 'cities', 'countries')); // Trả về view chỉnh sửa thông tin khách sạn
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Hotel $hotel)
     {
-        $request->validate([
+        // Validation dữ liệu đầu vào
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:hotels,slug,' . $hotel->id,
-            'thumbnail' => 'nullable|image',
-            'link_ggmaps' => 'nullable|url',
             'city_id' => 'required|exists:cities,id',
             'country_id' => 'required|exists:countries,id',
-            'address' => 'required|string|max:255',
-            'start_level' => 'nullable|integer',
+            'address' => 'required|string|max:255', // Thêm validation cho address
+            'link_ggmaps' => 'nullable|url', // Thêm validation cho link Google Maps
+            'thumbnail' => 'nullable|image',
+            'start_level' => 'required|integer|min:1|max:5',
         ]);
 
-        $hotel->update($request->all());
-
-        // Handle thumbnail upload
+        // Xử lý upload thumbnail nếu có
         if ($request->hasFile('thumbnail')) {
-            $hotel->thumbnail = $request->file('thumbnail')->store('thumbnails');
-            $hotel->save();
+            $validated['thumbnail'] = $request->file('thumbnail')->store('hotels', 'public');
         }
 
-        return redirect()->route('admin.hotels.show', $hotel)->with('success', 'Hotel updated successfully!');
+        // Tạo slug từ tên khách sạn
+        $validated['slug'] = Str::slug($validated['name']);
+
+        // Cập nhật thông tin khách sạn
+        $hotel->update($validated);
+
+        // Quay lại danh sách khách sạn với thông báo thành công
+        return redirect()->route('admin.hotels.index')->with('success', 'Hotel updated successfully!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Hotel $hotel)
     {
-        //
+        // Xóa khách sạn
         $hotel->delete();
         return redirect()->route('admin.hotels.index')->with('success', 'Hotel deleted successfully!');
     }

@@ -23,6 +23,7 @@ class CityController extends Controller
     public function create()
     {
         //
+
     }
 
     /**
@@ -31,6 +32,7 @@ class CityController extends Controller
     public function store(Request $request)
     {
         //
+
     }
 
     /**
@@ -39,6 +41,7 @@ class CityController extends Controller
     public function show(City $city)
     {
         //
+
     }
 
     /**
@@ -47,6 +50,7 @@ class CityController extends Controller
     public function edit(City $city)
     {
         //
+
     }
 
     /**
@@ -54,7 +58,7 @@ class CityController extends Controller
      */
     public function update(Request $request, City $city)
     {
-        //
+
     }
 
     /**
@@ -62,6 +66,6 @@ class CityController extends Controller
      */
     public function destroy(City $city)
     {
-        //
+
     }
 }
